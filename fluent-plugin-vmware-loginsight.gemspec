@@ -14,7 +14,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |spec|
   spec.name    = "fluent-plugin-vmware-loginsight"
-  spec.version = "0.1.0"
+  spec.version = "0.1.2"
   spec.authors = ["Vishal Mohite"]
   spec.email   = ["vmohite@vmware.com"]
 
