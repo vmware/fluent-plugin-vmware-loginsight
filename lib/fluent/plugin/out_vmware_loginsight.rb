@@ -119,11 +119,11 @@ module Fluent
         key = key.gsub(/__/,'_')
         # shorten field names
         key = key.gsub(/kubernetes_/,'k8s_')
+        key = key.gsub(/namespace/,'ns')
         key = key.gsub(/labels_/,'')
         key = key.gsub(/_name/,'')
         key = key.gsub(/_hash/,'')
         key = key.gsub(/container_/,'')
-        key = key.gsub(/namespace/,'ns')
         key
       end
 
