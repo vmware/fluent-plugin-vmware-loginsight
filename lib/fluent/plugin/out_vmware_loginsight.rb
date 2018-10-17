@@ -62,6 +62,9 @@ module Fluent
       config_param :include_tag_key, :bool, :default => true
       # Metadata key that identifies Fluentd tags
       config_param :tag_key, :string, :default => 'tag'
+      # Keys from log event whose values should be added as log message/text
+      # to loginsight. Note these key/value pairs  won't be added as metadata/fields
+      config_param :log_text_keys, :array, default: ["log", "message", "msg"], value_type: :string
       # Flatten hashes to create one key/val pair w/o losing log data
       config_param :flatten_hashes, :bool, :default => true
       # Seperator to use for joining flattened keys
@@ -131,6 +134,8 @@ module Fluent
         flattened_records = {}
         if @flatten_hashes
           flattened_records = flatten_record(record, [])
+        else
+          flattened_records = record
         end
         flattened_records[@tag_key] = tag if @include_tag_key
         fields = []
@@ -146,8 +151,9 @@ module Fluent
             end
             keys.push(key)
             key.force_encoding("utf-8")
-            # convert value to string if needed
+            # convert value to json string if its a hash and to string if not already a string
             begin
+              value = value.to_json if value.is_a?(Hash)
               value = value.to_s if not value.instance_of?(String)
               value.force_encoding("utf-8")
             rescue Exception=>e
@@ -156,7 +162,7 @@ module Fluent
               value = "Exception during conversion: #{e.message}"
             end
           end
-          if ['log', 'message', 'msg'].include?(key)
+          if @log_text_keys.include?(key)
             if log != "#{value}"
               if log.empty?
                 log = "#{value}"
@@ -189,9 +195,13 @@ module Fluent
 
         case record
           when Hash
-            record.each { |key, value|
-              ret.merge! flatten_record(value, prefix + [key.to_s])
-            }
+            record.each do |key, value|
+              if @log_text_keys.include?(key)
+                ret.merge!({key.to_s => value})
+              else
+                ret.merge! flatten_record(value, prefix + [key.to_s])
+              end
+            end
           when Array
             # Don't mess with arrays, leave them unprocessed
             ret.merge!({prefix.join(@flatten_hashes_separator) => record})

@@ -113,6 +113,10 @@ include_tag_key, :bool, :default => true :: Valid Value: true | false
 # Metadata key that identifies Fluentd tags
 tag_key, :string, :default => 'tag'
 
+# Keys from log event whose values should be added as log message/text to loginsight.
+# These key/value pairs won't expanded/flattened and won't be added as metadata/fields.
+log_text_keys, :array, :default => ["log", "message", "msg"] :: Valid Value: Array of strings
+
 # Flatten hashes to create one key/val pair w/o losing log data
 flatten_hashes, :bool, :default => true :: Valid Value: true | false
 
