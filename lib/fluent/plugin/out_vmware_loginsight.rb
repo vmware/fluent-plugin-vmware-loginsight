@@ -51,6 +51,7 @@ module Fluent
       config_param :serializer, :string, :default => :json
       config_param :request_retries, :integer, :default => 3
       config_param :request_timeout, :time, :default => 5
+      config_param :http_conn_debug, :bool, :default => false
       config_param :max_batch_size, :integer, :default => 512000
 
       # Simple rate limiting: ignore any records within `rate_limit_msec`
@@ -68,7 +69,7 @@ module Fluent
       # Flatten hashes to create one key/val pair w/o losing log data
       config_param :flatten_hashes, :bool, :default => true
       # Seperator to use for joining flattened keys
-      config_param :flatten_hashes_separator, :string, :default => "__"
+      config_param :flatten_hashes_separator, :string, :default => "_"
 
 
       def initialize
@@ -116,10 +117,8 @@ module Fluent
 
       def shorten_key(key)
         # LI doesn't allow some characters in field 'name'
-        # like '/', '-', '\', '.', etc. so replace them with '_'
-        key = key.gsub(/[\/\.\-\\]/,'_').downcase
-        # remove double underscores
-        key = key.gsub(/__/,'_')
+        # like '/', '-', '\', '.', etc. so replace them with @flatten_hashes_separator
+        key = key.gsub(/[\/\.\-\\]/,@flatten_hashes_separator).downcase
         # shorten field names
         key = key.gsub(/kubernetes_/,'k8s_')
         key = key.gsub(/namespace/,'ns')
@@ -154,7 +153,7 @@ module Fluent
             # convert value to json string if its a hash and to string if not already a string
             begin
               value = value.to_json if value.is_a?(Hash)
-              value = value.to_s if not value.instance_of?(String)
+              value = value.to_s
               value.force_encoding("utf-8")
             rescue Exception=>e
               $log.warn "force_encoding exception: " "#{e.class}, '#{e.message}', " \
@@ -203,8 +202,9 @@ module Fluent
               end
             end
           when Array
-            # Don't mess with arrays, leave them unprocessed
-            ret.merge!({prefix.join(@flatten_hashes_separator) => record})
+            record.each do |value|
+              ret.merge! flatten_record(value, prefix)
+            end
           else
             return {prefix.join(@flatten_hashes_separator) => record}
         end
@@ -238,7 +238,7 @@ module Fluent
 
           http_conn = Net::HTTP.new(uri.host, uri.port)
           # For debugging, set this
-          #http_conn.set_debug_output($stdout)
+          http_conn.set_debug_output($stdout) if @http_conn_debug
           http_conn.use_ssl = (uri.scheme == 'https')
           if http_conn.use_ssl?
             http_conn.ca_file = @ca_file

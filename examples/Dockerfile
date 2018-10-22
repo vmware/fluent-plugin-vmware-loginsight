@@ -21,6 +21,7 @@ RUN buildDeps="sudo make gcc g++ libc-dev ruby-dev libffi-dev" \
  && sudo gem install \
         fluent-plugin-systemd \
         fluent-plugin-kubernetes_metadata_filter \
+        fluent-plugin-vmware-loginsight \
  && sudo gem sources --clear-all \
  && SUDO_FORCE_REMOVE=yes \
     apt-get purge -y --auto-remove \

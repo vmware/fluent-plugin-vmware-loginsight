@@ -101,6 +101,9 @@ request_retries, :integer, :default => 3
 # http connection ttl for each request
 request_timeout, :time, :default => 5
 
+# If set, enables debug logs for http connection
+http_conn_debug, :bool, :default => false :: Valid Value: true | false
+
 # Simple rate limiting: ignore any records within `rate_limit_msec` since the last one
 rate_limit_msec, :integer, :default => 0
 
@@ -121,7 +124,7 @@ log_text_keys, :array, :default => ["log", "message", "msg"] :: Valid Value: Arr
 flatten_hashes, :bool, :default => true :: Valid Value: true | false
 
 # Seperator to use for joining flattened keys
-flatten_hashes_separator, :string, :default => "__"
+flatten_hashes_separator, :string, :default => "_"
 ```
 
 For more examples look at [examples](./examples/)
