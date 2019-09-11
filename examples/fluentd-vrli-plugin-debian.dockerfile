@@ -1,6 +1,6 @@
 # Fluentd plugin for VMware Log Insight
 # 
-# Copyright 2018 VMware, Inc. All Rights Reserved. 
+# Copyright 2018-2019 VMware, Inc. All Rights Reserved. 
 # 
 # This product is licensed to you under the MIT license (the "License").  You may not use this product except in compliance with the MIT License.  
 # 
@@ -8,7 +8,11 @@
 # 
 # SPDX-License-Identifier: MIT
 
-
+# Builds a debian-based image that contains fluentd, fluent-plugin-vmware-loginsight, fluent-plugin-kubernetes_metadata_filter
+# and fluent-plugin-systemd.
+#
+# The image is preconfigured with the fluent.conf from the examples dir. For more details see
+# https://github.com/vmware/fluent-plugin-vmware-loginsight/blob/master/examples/fluent.conf
 FROM fluent/fluentd:v0.14.15-debian-onbuild
 # Above image expects the loginsight plugin vmware_loginsight to be available under ./plugins/vmware_loginsight.rb
 # and fluentd config under ./fluent.conf by default
