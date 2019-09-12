@@ -136,7 +136,8 @@ module Fluent
         else
           flattened_records = record
         end
-        flattened_records[@tag_key] = tag if @include_tag_key
+        # tag can be immutable in some cases, use a copy.
+        flattened_records[@tag_key] = tag.dup if @include_tag_key
         fields = []
         keys = []
         log = ''
@@ -154,6 +155,7 @@ module Fluent
             begin
               value = value.to_json if value.is_a?(Hash)
               value = value.to_s
+              value = value.frozen? ? value.dup : value # if value is immutable, use a copy.
               value.force_encoding("utf-8")
             rescue Exception=>e
               $log.warn "force_encoding exception: " "#{e.class}, '#{e.message}', " \
