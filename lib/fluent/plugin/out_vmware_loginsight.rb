@@ -230,7 +230,7 @@ module Fluent
           return
         end
 
-        if @auth and @auth == 'basic'
+        if @auth and @auth.to_s.eql? "basic"
           req.basic_auth(@username, @password)
         end
         begin
