@@ -118,7 +118,7 @@ module Fluent
       def shorten_key(key)
         # LI doesn't allow some characters in field 'name'
         # like '/', '-', '\', '.', etc. so replace them with @flatten_hashes_separator
-        key = key.gsub(/[\/\.\-\\]/,@flatten_hashes_separator).downcase
+        key = key.gsub(/[\/\.\-\\\@]/,@flatten_hashes_separator).downcase
         # shorten field names
         key = key.gsub(/kubernetes_/,'k8s_')
         key = key.gsub(/namespace/,'ns')
