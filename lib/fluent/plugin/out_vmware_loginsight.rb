@@ -70,8 +70,22 @@ module Fluent
       config_param :flatten_hashes, :bool, :default => true
       # Seperator to use for joining flattened keys
       config_param :flatten_hashes_separator, :string, :default => "_"
-      # Keys from log event whose values shorten
-      config_param :shorten_keys, :hash, default:
+
+      # Keys from log event to rewrite
+      # for instance from 'kubernetes_namespace' to 'k8s_namespace'
+      # tags will be rewritten with substring substitution
+      # and applied in the order present in the hash
+      # (Hashes enumerate their values in the order that the
+      # corresponding keys were inserted
+      # see https://ruby-doc.org/core-2.2.2/Hash.html)
+      # example config:
+      # shorten_keys {
+      #    "__":"_",
+      #    "container_":"",
+      #    "kubernetes_":"k8s_",
+      #    "labels_":"",
+      # }
+      config_param :shorten_keys, :hash, value_type: :string, default:
         {
             'kubernetes_':'k8s_',
             'namespace':'ns',
