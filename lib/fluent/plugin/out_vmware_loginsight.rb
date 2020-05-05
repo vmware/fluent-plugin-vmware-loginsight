@@ -143,7 +143,7 @@ module Fluent
         # like '/', '-', '\', '.', etc. so replace them with @flatten_hashes_separator
         key = key.gsub(/[\/\.\-\\]/,@flatten_hashes_separator).downcase
         # shorten field names using provided shorten_keys parameters
-        shorten_keys.each do | match, replace |
+        @shorten_keys.each do | match, replace |
             key = key.gsub(match,replace)
         end
         key
