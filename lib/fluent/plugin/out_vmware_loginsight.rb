@@ -144,7 +144,7 @@ module Fluent
         key = key.gsub(/[\/\.\-\\]/,@flatten_hashes_separator).downcase
         # shorten field names using provided shorten_keys parameters
         @shorten_keys.each do | match, replace |
-            key = key.gsub(match,replace)
+            key = key.gsub(match.to_s,replace)
         end
         key
       end
