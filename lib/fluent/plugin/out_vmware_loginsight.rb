@@ -141,7 +141,7 @@ module Fluent
       def shorten_key(key)
         # LI doesn't allow some characters in field 'name'
         # like '/', '-', '\', '.', etc. so replace them with @flatten_hashes_separator
-        key = key.gsub(/[\/\.\-\\]/,@flatten_hashes_separator).downcase
+        key = key.gsub(/[\/\.\-\\\@]/,@flatten_hashes_separator).downcase
         # shorten field names using provided shorten_keys parameters
         @shorten_keys.each do | match, replace |
             key = key.gsub(match.to_s,replace)
