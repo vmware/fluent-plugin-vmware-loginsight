@@ -1,5 +1,7 @@
 # fluent-plugin-vmware-loginsight
 
+[![Gem Version](https://badge.fury.io/rb/fluent-plugin-vmware-loginsight.svg)](https://badge.fury.io/rb/fluent-plugin-vmware-loginsight)
+
 ## Overview
 output plugin to do forward logs to VMware Log Insight
 
