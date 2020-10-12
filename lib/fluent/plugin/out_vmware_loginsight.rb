@@ -12,6 +12,7 @@
 require "fluent/plugin/output"
 require 'json'
 require 'net/http'
+require 'zlib'
 require 'uri'
 
 module Fluent
@@ -47,6 +48,7 @@ module Fluent
       # HTTP method
       # post | put
       config_param :http_method, :string, :default => :post
+      config_param :http_compress, :bool, :default => true
       # form | json
       config_param :serializer, :string, :default => :json
       config_param :request_retries, :integer, :default => 3
@@ -130,11 +132,19 @@ module Fluent
         if @serializer == 'json'
           set_json_header(req)
         end
+        if @http_compress
+            set_gzip_header(req)
+        end
         req
       end
 
       def set_json_header(req)
         req['Content-Type'] = 'application/json'
+        req
+      end
+
+      def set_gzip_header(req)
+        req['Content-Encoding'] = 'gzip'
         req
       end
 
@@ -242,6 +252,16 @@ module Fluent
         return req, uri
       end
 
+      def get_body(req)
+         body = ""
+         if @http_compress
+             gzip_body = Zlib::GzipReader.new(StringIO.new(req.body.to_s))
+             body = gzip_body.read
+         else
+             body = req.body
+         end
+         return body[1..1024]
+       end
 
       def send_request(req, uri)
         is_rate_limited = (@rate_limit_msec != 0 and not @last_request_time.nil?)
@@ -277,7 +297,7 @@ module Fluent
           # log-container logs to LI as well, you may end up in a cycle.
           # TODO handle the cyclic case at plugin level if possible.
           # $log.warn "Net::HTTP.#{req.method.capitalize} raises exception: " \
-          #   "#{e.class}, '#{e.message}', \n Request: #{req.body[1..1024]}"
+          #   "#{e.class}, '#{e.message}', \n Request: #{get_body(req)}"
           retry unless (retries -= 1).zero?
           raise e if @raise_on_error
         else
@@ -291,17 +311,27 @@ module Fluent
                             end
               # ditto cyclic warning
               # $log.warn "Failed to #{req.method} #{uri}\n(#{res_summary})\n" \
-              #   "Request Size: #{req.body.size} Request Body: #{req.body[1..1024]}"
+              #   "Request Size: #{req.body.size} Request Body: #{get_body(req)}"
            end #end unless
         end # end begin
       end # end send_request
+
+      def set_body(req, event_req)
+          if @http_compress
+              gzip_body = Zlib::GzipWriter.new(StringIO.new)
+              gzip_body << event_req.to_json
+              req.body = gzip_body.close.string
+          else
+              req.body = event_req.to_json
+          end
+      end
 
       def send_events(uri, events)
         req = Net::HTTP.const_get(@http_method.to_s.capitalize).new(uri.path)
         event_req = {
           "events" => events
         }
-        req.body = event_req.to_json
+        set_body(req, event_req)
         set_header(req)
         send_request(req, uri)
       end
