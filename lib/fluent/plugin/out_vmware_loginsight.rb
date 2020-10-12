@@ -71,6 +71,29 @@ module Fluent
       # Seperator to use for joining flattened keys
       config_param :flatten_hashes_separator, :string, :default => "_"
 
+      # Keys from log event to rewrite
+      # for instance from 'kubernetes_namespace' to 'k8s_namespace'
+      # tags will be rewritten with substring substitution
+      # and applied in the order present in the hash
+      # (Hashes enumerate their values in the order that the
+      # corresponding keys were inserted
+      # see https://ruby-doc.org/core-2.2.2/Hash.html)
+      # example config:
+      # shorten_keys {
+      #    "__":"_",
+      #    "container_":"",
+      #    "kubernetes_":"k8s_",
+      #    "labels_":"",
+      # }
+      config_param :shorten_keys, :hash, value_type: :string, default:
+        {
+            'kubernetes_':'k8s_',
+            'namespace':'ns',
+            'labels_':'',
+            '_name':'',
+            '_hash':'',
+            'container_':''
+        }
 
       def initialize
         super
@@ -118,14 +141,11 @@ module Fluent
       def shorten_key(key)
         # LI doesn't allow some characters in field 'name'
         # like '/', '-', '\', '.', etc. so replace them with @flatten_hashes_separator
-        key = key.gsub(/[\/\.\-\\]/,@flatten_hashes_separator).downcase
-        # shorten field names
-        key = key.gsub(/kubernetes_/,'k8s_')
-        key = key.gsub(/namespace/,'ns')
-        key = key.gsub(/labels_/,'')
-        key = key.gsub(/_name/,'')
-        key = key.gsub(/_hash/,'')
-        key = key.gsub(/container_/,'')
+        key = key.gsub(/[\/\.\-\\\@]/,@flatten_hashes_separator).downcase
+        # shorten field names using provided shorten_keys parameters
+        @shorten_keys.each do | match, replace |
+            key = key.gsub(match.to_s,replace)
+        end
         key
       end
 

@@ -1,5 +1,7 @@
 # fluent-plugin-vmware-loginsight
 
+[![Gem Version](https://badge.fury.io/rb/fluent-plugin-vmware-loginsight.svg)](https://badge.fury.io/rb/fluent-plugin-vmware-loginsight)
+
 ## Overview
 output plugin to do forward logs to VMware Log Insight
 
@@ -28,39 +30,61 @@ $ bundle
 ## Usage
 
 ```
+# Collect all container logs
 <source>
   @type tail
+  @id in_tail_container_logs
   path /var/log/containers/*.log
+  # One could exclude certain logs like:
+  #exclude_path ["/var/log/containers/log-collector*.log"]
   pos_file /var/log/fluentd-docker.pos
-  time_format %Y-%m-%dT%H:%M:%S
-  tag kubernetes.*
-  format json
   read_from_head true
+  # Set this watcher to false if you have many files to tail
+  enable_stat_watcher false
+  refresh_interval 5
+  tag kubernetes.*
+  <parse>
+    @type json
+    time_key time
+    keep_time_key true
+    time_format %Y-%m-%dT%H:%M:%S.%NZ
+  </parse>
 </source>
 
-# Kubernetes metadata filter that tags additional meta data for each event
-<filter kubernetes.var.log.containers.**.log>
+# Kubernetes metadata filter that tags additional meta data for each container event
+<filter kubernetes.**>
   @type kubernetes_metadata
+  @id filter_kube_metadata
+  kubernetes_url "#{ENV['FLUENT_FILTER_KUBERNETES_URL'] || 'https://' + ENV.fetch('KUBERNETES_SERVICE_HOST') + ':' + ENV.fetch('KUBERNETES_SERVICE_PORT') + '/api'}"
+  verify_ssl "#{ENV['KUBERNETES_VERIFY_SSL'] || true}"
+  ca_file "#{ENV['KUBERNETES_CA_FILE']}"
+  skip_labels "#{ENV['FLUENT_KUBERNETES_METADATA_SKIP_LABELS'] || 'false'}"
+  skip_container_metadata "#{ENV['FLUENT_KUBERNETES_METADATA_SKIP_CONTAINER_METADATA'] || 'false'}"
+  skip_master_url "#{ENV['FLUENT_KUBERNETES_METADATA_SKIP_MASTER_URL'] || 'false'}"
+  skip_namespace_metadata "#{ENV['FLUENT_KUBERNETES_METADATA_SKIP_NAMESPACE_METADATA'] || 'false'}"
 </filter>
 
+# Match everything
 <match **>
   @type vmware_loginsight
+  @id out_vmw_li_all_container_logs
   scheme https
   ssl_verify true
-# Loginsight host: One may use IP address or cname
-# host X.X.X.X
-  host my-loginsight.mycompany.com
-  port 9000
-  path api/v1/events/ingest
+  # Loginsight host: One may use IP address or cname
+  #host X.X.X.X
+  host MY_LOGINSIGHT_HOST
+  port 9543
   agent_id XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
-  http_method post
-  serializer json
-  rate_limit_msec 0
-  raise_on_error false
-  include_tag_key true
-  tag_key tag
+  # Keys from log event whose values should be added as log message/text to
+  # Loginsight. Note these key/value pairs  won't be added as metadata/fields
+  log_text_keys ["log","msg","message"]
+  # Use this flag if you want to enable http debug logs
+  http_conn_debug false
 </match>
 ```
+
+For more examples look at [examples](./examples/)
+
 ### Configuration options
 
 ```
@@ -104,6 +128,9 @@ request_timeout, :time, :default => 5
 # If set, enables debug logs for http connection
 http_conn_debug, :bool, :default => false :: Valid Value: true | false
 
+# Number of bytes per post request
+max_batch_size, :integer, :default => 512000
+
 # Simple rate limiting: ignore any records within `rate_limit_msec` since the last one
 rate_limit_msec, :integer, :default => 0
 
@@ -125,9 +152,32 @@ flatten_hashes, :bool, :default => true :: Valid Value: true | false
 
 # Seperator to use for joining flattened keys
 flatten_hashes_separator, :string, :default => "_"
-```
 
-For more examples look at [examples](./examples/)
+# Keys from log event to rewrite
+# for instance from 'kubernetes_namespace' to 'k8s_namespace'
+# tags will be rewritten with substring substitution
+# and applied in the order present in the hash
+# (Hashes enumerate their values in the order that the
+# corresponding keys were inserted
+# see https://ruby-doc.org/core-2.2.2/Hash.html)
+# example config:
+# shorten_keys {
+#    "__":"_",
+#    "container_":"",
+#    "kubernetes_":"k8s_",
+#    "labels_":"",
+# }
+shorten_keys, :hash, value_type: :string, default:
+        {
+            'kubernetes_':'k8s_',
+            'namespace':'ns',
+            'labels_':'',
+            '_name':'',
+            '_hash':'',
+            'container_':''
+        }
+
+```
 
 ## Contributing
 
