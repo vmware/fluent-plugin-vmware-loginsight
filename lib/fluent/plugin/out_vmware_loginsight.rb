@@ -95,6 +95,19 @@ module Fluent
             'container_':''
         }
 
+      # Override some defaults for buffer configuration
+      config_section :buffer do
+        config_set_default :chunk_keys, ['tag']
+        config_set_default :@type, 'memory'
+        config_set_default :flush_mode, :interval
+        config_set_default :flush_interval, 60
+        config_set_default :flush_at_shutdown, true
+        config_set_default :overflow_action, :drop_oldest_chunk
+        config_set_default :retry_type, :exponential_backoff
+        config_set_default :retry_max_interval, 5 * 60 * 60
+        config_set_default :retry_timeout, 72 * 60 * 60
+      end
+
       def initialize
         super
       end
@@ -306,12 +319,12 @@ module Fluent
         send_request(req, uri)
       end
 
-      def handle_records(tag, es)
+      def handle_records(tag_time_record_iter)
         url = format_url()
         uri = URI.parse(url)
         events = []
         count = 0
-        es.each do |time, record|
+        tag_time_record_iter.each do |tag, time, record|
           new_event = create_loginsight_event(tag, time, record)
           new_event_size = new_event.to_json.size
           if new_event_size > @max_batch_size
@@ -331,10 +344,47 @@ module Fluent
         end
       end
 
-      def emit(tag, es, chain)
-        handle_records(tag, es)
-        chain.next
+      def process(tag, es)
+        handle_records(TaggedEventStreamIterator.new(tag, es))
       end
+
+      def write(chunk)
+        handle_records(chunk)
+      end
+
+      def format(tag, time, record)
+        [tag, time, record].to_msgpack
+      end
+
+      def formatted_to_msgpack_binary?
+        true
+      end
+
+      def prefer_buffered_processing
+        # This will make the plugin run in sync mode by default if no <buffer>
+        # section is added in fluent.conf. Otherwise, the specified buffer will
+        # be used and defaults will be applied where applicable.
+        false
+      end
+
+      # Used to provide a (tag, time, record) iterator for the process method so process
+      # and write can be handled in the same way.
+      class TaggedEventStreamIterator
+
+        def initialize(tag, event_stream)
+          @tag = tag
+          @event_stream = event_stream
+        end
+
+        def each
+          @event_stream.each do |time, record|
+            yield @tag, time, record
+          end
+          nil
+        end
+
+      end
+
     end
   end
 end

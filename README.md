@@ -80,6 +80,18 @@ $ bundle
   log_text_keys ["log","msg","message"]
   # Use this flag if you want to enable http debug logs
   http_conn_debug false
+
+  # If buffer is configured, retries can be controlled by it
+  # so we can disable the manual retries done by the plugin
+  # request_retries 1
+  # <buffer tag>
+  #   @type file
+  #   path /var/log/fluentd/buffer
+  #   flush_mode interval
+  #   flush_interval 60s
+  #  # Check https://docs.fluentd.org/configuration/buffer-section for more options
+  # </buffer>
+
 </match>
 ```
 
@@ -152,6 +164,20 @@ flatten_hashes, :bool, :default => true :: Valid Value: true | false
 
 # Seperator to use for joining flattened keys
 flatten_hashes_separator, :string, :default => "_"
+
+# Buffer defaults specified by this plugin. Check https://docs.fluentd.org/configuration/buffer-section for more options
+  config_section :buffer do
+    config_set_default :chunk_keys, ['tag']
+    config_set_default :@type, 'memory'
+    config_set_default :flush_mode, :interval
+    config_set_default :flush_interval, 60
+    config_set_default :flush_at_shutdown, true
+    config_set_default :overflow_action, :drop_oldest_chunk
+    config_set_default :retry_type, :exponential_backoff
+    config_set_default :retry_max_interval, 5 * 60 * 60
+    config_set_default :retry_timeout, 72 * 60 * 60
+  end
+```
 
 # Keys from log event to rewrite
 # for instance from 'kubernetes_namespace' to 'k8s_namespace'
