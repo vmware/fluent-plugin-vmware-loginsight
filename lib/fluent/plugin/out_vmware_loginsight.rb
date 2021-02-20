@@ -70,6 +70,8 @@ module Fluent
       config_param :flatten_hashes, :bool, :default => true
       # Seperator to use for joining flattened keys
       config_param :flatten_hashes_separator, :string, :default => "_"
+      # Rename fields names
+      config_param :rename_fields, :hash, default: {"source" => "log_source"}, value_type: :string
 
       # Keys from log event to rewrite
       # for instance from 'kubernetes_namespace' to 'k8s_namespace'
@@ -164,6 +166,10 @@ module Fluent
         flattened_records.each do |key, value|
           begin
             next if value.nil?
+            # check if name of the key should be replaced
+            if @rename_fields.has_key?(key)
+              key = @rename_fields[key]
+            end
             # LI doesn't support duplicate fields, make unique names by appending underscore
             key = shorten_key(key)
             while keys.include?(key)

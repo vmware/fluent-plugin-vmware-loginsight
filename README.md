@@ -153,6 +153,9 @@ flatten_hashes, :bool, :default => true :: Valid Value: true | false
 # Seperator to use for joining flattened keys
 flatten_hashes_separator, :string, :default => "_"
 
+# Rename fields names
+config_param :rename_fields, :hash, default: {"source" => "log_source"}, value_type: :string
+
 # Keys from log event to rewrite
 # for instance from 'kubernetes_namespace' to 'k8s_namespace'
 # tags will be rewritten with substring substitution
