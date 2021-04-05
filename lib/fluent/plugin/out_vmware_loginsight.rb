@@ -17,7 +17,6 @@ require 'uri'
 module Fluent
   module Plugin
     class Fluent::VmwareLoginsightOutput < Fluent::Output
-      class ConnectionFailure < StandardError; end
 
       Fluent::Plugin.register_output('vmware_loginsight', self)
 
@@ -201,7 +200,7 @@ module Fluent
             # If there is time information available, update time for LI. LI ignores
             # time if it is out of the error/adjusment window of 10 mins. in such
             # cases we would still like to preserve time info, so add it as event.
-            # TODO Ignore the below block for now. Handle the case for time being in 
+            # TODO Ignore the below block for now. Handle the case for time being in
             #      different formats than milliseconds
             #if ['time', '_source_realtime_timestamp'].include?(key)
             #  time = value
@@ -344,4 +343,3 @@ module Fluent
     end
   end
 end
-
