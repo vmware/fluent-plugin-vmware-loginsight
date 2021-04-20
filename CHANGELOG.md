@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.0.0 - April 20, 2021
+
+* Update plugin structure to use Fluentd 1.x syntax
+
 ## v0.1.11 - March 31, 2021
 
 * Add an option to rename Loginsight fields. This option could be used to rename certain fields that are reserved by Loginsight
