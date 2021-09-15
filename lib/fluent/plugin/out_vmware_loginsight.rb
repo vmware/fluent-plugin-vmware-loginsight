@@ -49,6 +49,7 @@ module Fluent::Plugin
     config_param :request_retries, :integer, :default => 3
     config_param :request_timeout, :time, :default => 5
     config_param :http_conn_debug, :bool, :default => false
+    # in bytes
     config_param :max_batch_size, :integer, :default => 512000
 
     # Simple rate limiting: ignore any records within `rate_limit_msec`
@@ -56,10 +57,6 @@ module Fluent::Plugin
     config_param :rate_limit_msec, :integer, :default => 0
     # Raise errors that were rescued during HTTP requests?
     config_param :raise_on_error, :bool, :default => false
-    ### Additional Params
-    config_param :include_tag_key, :bool, :default => true
-    # Metadata key that identifies Fluentd tags
-    config_param :tag_key, :string, :default => 'tag'
     # Keys from log event whose values should be added as log message/text
     # to loginsight. Note these key/value pairs  won't be added as metadata/fields
     config_param :log_text_keys, :array, default: ["log", "message", "msg"], value_type: :string
@@ -91,6 +88,12 @@ module Fluent::Plugin
           '_hash':'',
           'container_':''
       }
+
+    config_section :buffer do
+      config_set_default :@type, "memory"
+      config_set_default :chunk_keys, []
+      config_set_default :timekey_use_utc, true
+    end
 
     def configure(conf)
       super
@@ -134,15 +137,13 @@ module Fluent::Plugin
       key
     end
 
-    def create_loginsight_event(tag, time, record)
+    def create_loginsight_event(time, record)
       flattened_records = {}
       if @flatten_hashes
         flattened_records = flatten_record(record, [])
       else
         flattened_records = record
       end
-      # tag can be immutable in some cases, use a copy.
-      flattened_records[@tag_key] = tag.dup if @include_tag_key
       fields = []
       keys = []
       log = ''
@@ -218,15 +219,6 @@ module Fluent::Plugin
       ret
     end
 
-    def create_request(tag, time, record)
-      url = format_url()
-      uri = URI.parse(url)
-      req = Net::HTTP.const_get(@http_method.to_s.capitalize).new(uri.path)
-      set_body(req, tag, time, record)
-      set_header(req)
-      return req, uri
-    end
-
     def send_request(req, uri)
       is_rate_limited = (@rate_limit_msec != 0 and not @last_request_time.nil?)
       if is_rate_limited and ((Time.now.to_f - @last_request_time) * 1000.0 < @rate_limit_msec)
@@ -290,13 +282,13 @@ module Fluent::Plugin
       send_request(req, uri)
     end
 
-    def handle_records(tag, es)
+    def handle_records(chunk)
       url = format_url()
       uri = URI.parse(url)
       events = []
       count = 0
-      es.each do |time, record|
-        new_event = create_loginsight_event(tag, time, record)
+      chunk.each do |time, record|
+        new_event = create_loginsight_event(time, record)
         new_event_size = new_event.to_json.size
         if new_event_size > @max_batch_size
             $log.warn "dropping event larger than max_batch_size: #{new_event.to_json[1..1024]}"
@@ -315,8 +307,9 @@ module Fluent::Plugin
       end
     end
 
-    def process(tag, es)
-      handle_records(tag, es)
+    # Sync Buffered Output
+    def write(chunk)
+      handle_records(chunk)
     end
   end
 end

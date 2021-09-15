@@ -43,6 +43,8 @@ $ bundle
   enable_stat_watcher false
   refresh_interval 5
   tag kubernetes.*
+  # Open below line if you need have filename as tag field (now without prefix kubernetes.)
+  # path_key tag
   <parse>
     @type json
     time_key time
@@ -136,12 +138,6 @@ rate_limit_msec, :integer, :default => 0
 
 # Raise errors that were rescued during HTTP requests?
 raise_on_error, :bool, :default => false :: Valid Value: true | false 
-
-# Include tag key as log event?
-include_tag_key, :bool, :default => true :: Valid Value: true | false 
-
-# Metadata key that identifies Fluentd tags
-tag_key, :string, :default => 'tag'
 
 # Keys from log event whose values should be added as log message/text to loginsight.
 # These key/value pairs won't expanded/flattened and won't be added as metadata/fields.
