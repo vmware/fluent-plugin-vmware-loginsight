@@ -114,6 +114,10 @@ module Fluent::Plugin
       url
     end
 
+    def multi_workers_ready?
+      true
+    end
+
     def set_header(req)
       if @serializer == 'json'
         set_json_header(req)
