@@ -14,7 +14,7 @@
 # Fluentd is configured with the default configuration that gets produced by the `fluentd --setup` command. For an example of
 # a configuration that uses the fluent-plugin-vmware-loginsight plugin check fluent.conf under the examples dir:
 # https://github.com/vmware/fluent-plugin-vmware-loginsight/blob/master/examples/fluent.conf
-FROM photon:4.0-20220520
+FROM photon:4.0-20220722
 
 USER root
 
