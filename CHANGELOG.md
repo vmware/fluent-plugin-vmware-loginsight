@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.3.0 - July 29, 2022
+
+* Added buffering support 
+
 ## v1.0.0 - April 20, 2021
 
 * Update plugin structure to use Fluentd 1.x syntax
