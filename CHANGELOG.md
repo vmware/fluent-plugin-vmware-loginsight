@@ -2,7 +2,7 @@
 
 ## v1.3.0 - July 29, 2022
 
-* Added buffering support 
+* Added buffering support which allows sending out logs in chunks rather than one by one 
 
 ## v1.0.0 - April 20, 2021
 
