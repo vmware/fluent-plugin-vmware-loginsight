@@ -14,18 +14,17 @@
 # Fluentd is configured with the default configuration that gets produced by the `fluentd --setup` command. For an example of
 # a configuration that uses the fluent-plugin-vmware-loginsight plugin check fluent.conf under the examples dir:
 # https://github.com/vmware/fluent-plugin-vmware-loginsight/blob/master/examples/fluent.conf
-FROM photon:4.0-20220722
+FROM photon:4.0-20221029
 
 USER root
 
 RUN buildDeps="\
     binutils linux-api-headers glibc-devel \
     make gcc gmp-devel libffi-devel \
-    tar bzip2 sed gawk" \
+    tar bzip2 sed gawk build-essential" \
     #
     # Distro sync and install build dependencies
     && tdnf distro-sync --refresh -y \
-    # Toybox conflicts with bzip2. The latter is needed to unpack libjemalloc
     && tdnf remove -y toybox \
     && tdnf install -y $buildDeps ruby \
     #
@@ -35,29 +34,34 @@ RUN buildDeps="\
     && gem install async-http -v 0.46.3 \
     #
     # Install fluentd
-    && gem install --norc --no-document fluentd -v 1.14.2 \
-    && mkdir -p /fluentd/etc /fluentd/plugins \
+    && gem install --norc --no-document fluentd \
+    && gem install --norc --no-document fluent-plugin-systemd \
+    && gem install --norc --no-document i18n \
+    && gem install --norc --no-document fluent-plugin-concat \
+    && gem install --norc --no-document fluent-plugin-remote_syslog \
+    && gem install --norc --no-document fluent-plugin-docker_metadata_filter \
+    && gem install --norc --no-document fluent-plugin-detect-exceptions \
+    && gem install --norc --no-document fluent-plugin-multi-format-parser \
+    && gem install --norc --no-document fluent-plugin-kubernetes_metadata_filter \
     #
     # Install Log Insight plugin
-    && gem install --norc --no-document -v 0.1.5 fluent-plugin-vmware-loginsight \
+    && gem install --norc --no-document -v 1.3.0 fluent-plugin-vmware-loginsight \
     #
-    # Install jemalloc 4.5.0
-    && curl -L --output /tmp/jemalloc-4.5.0.tar.bz2 https://github.com/jemalloc/jemalloc/releases/download/4.5.0/jemalloc-4.5.0.tar.bz2 \
-    && tar -C /tmp/ -xjvf /tmp/jemalloc-4.5.0.tar.bz2 \
-    && cd /tmp/jemalloc-4.5.0 \
+    # Install jemalloc 5.3.0
+    && curl -L --output /tmp/jemalloc-5.3.0.tar.bz2 https://github.com/jemalloc/jemalloc/releases/download/5.3.0/jemalloc-5.3.0.tar.bz2 \
+    && tar -C /tmp/ -xjvf /tmp/jemalloc-5.3.0.tar.bz2 \
+    && cd /tmp/jemalloc-5.3.0 \
     && ./configure && make \
     && mv lib/libjemalloc.so.2 /usr/lib \
     && cd / \
-    #
-    # Cleanup to reduce image size
-    && rm -rf /tmp/jemalloc-4.5.0* \
+    && rm -rf /tmp/jemalloc-5.3.0* \
     && tdnf remove -y $buildDeps \
     && tdnf clean all \
     && gem sources --clear-all \
     && gem cleanup
 
 # Create default fluent.conf
-RUN fluentd --setup
+RUN fluentd --setup /etc/fluentd
 
 # Make sure fluentd picks jemalloc
 ENV LD_PRELOAD="/usr/lib/libjemalloc.so.2"
@@ -65,4 +69,4 @@ ENV LD_PRELOAD="/usr/lib/libjemalloc.so.2"
 # Standard fluentd ports
 EXPOSE 24224 5140
 
-ENTRYPOINT ["/usr/bin/fluentd"]
+ENTRYPOINT ["fluentd", "-c", "/etc/fluentd/fluent.conf"]
