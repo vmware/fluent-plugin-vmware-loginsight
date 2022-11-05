@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.3.1 - Nov 01, 2022
+
+* Based Photon image has been updated to photon:4.0-20221029
+
 ## v1.3.0 - July 29, 2022
 
 * Added buffering support which allows sending out logs in chunks rather than one by one 
