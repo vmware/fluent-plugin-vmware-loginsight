@@ -15,8 +15,8 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 Gem::Specification.new do |spec|
   spec.name    = "fluent-plugin-vmware-loginsight"
   spec.version = File.read("VERSION").strip
-  spec.authors = ["Vishal Mohite", "Chris Todd"]
-  spec.email   = ["vmohite@vmware.com", "toddc@vmware.com"]
+  spec.authors = ["Vishal Mohite", "Chris Todd", "Samvel Israelyan"]
+  spec.email   = ["vmohite@vmware.com", "toddc@vmware.com", "sisraelyan@vmware.com"]
 
   spec.summary       = %q{Fluend output plugin to forward logs to VMware Log Insight}
   spec.description   = spec.summary
