@@ -1,4 +1,4 @@
-# Fluentd plugin for VMware Log Insight
+# Fluentd plugin for VMware Aria Operations For Logs
 # 
 # Copyright 2018 VMware, Inc. All Rights Reserved. 
 # 
@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
   spec.authors = ["Vishal Mohite", "Chris Todd", "Samvel Israelyan"]
   spec.email   = ["vmohite@vmware.com", "toddc@vmware.com", "sisraelyan@vmware.com"]
 
-  spec.summary       = %q{Fluend output plugin to forward logs to VMware Log Insight}
+  spec.summary       = %q{Fluend output plugin to forward logs to VMware Aria Operations For Logs}
   spec.description   = spec.summary
   spec.homepage      = "https://github.com/vmware/fluent-plugin-vmware-loginsight"
   spec.license       = "MIT"

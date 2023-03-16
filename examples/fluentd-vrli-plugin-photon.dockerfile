@@ -1,4 +1,4 @@
-# Fluentd plugin for VMware Log Insight
+# Fluentd plugin for VMware Aria Operations For Logs
 # 
 # Copyright 2019 VMware, Inc. All Rights Reserved. 
 # 
@@ -38,7 +38,7 @@ RUN buildDeps="\
     && gem install --norc --no-document fluentd -v 1.6.3 \
     && mkdir -p /fluentd/etc /fluentd/plugins \
     #
-    # Install Log Insight plugin
+    # Install VMware Aria Operations For Logs plugin
     && gem install --norc --no-document -v 0.1.5 fluent-plugin-vmware-loginsight \
     #
     # Install jemalloc 4.5.0

@@ -1,4 +1,4 @@
-# Fluentd plugin for VMware Log Insight
+# Fluentd plugin for VMware Aria Operations For Logs
 # 
 # Copyright 2019 VMware, Inc. All Rights Reserved. 
 # 
@@ -14,7 +14,7 @@
 # Fluentd is configured with the default configuration that gets produced by the `fluentd --setup` command. For an example of
 # a configuration that uses the fluent-plugin-vmware-loginsight plugin check fluent.conf under the examples dir:
 # https://github.com/vmware/fluent-plugin-vmware-loginsight/blob/master/examples/fluent.conf
-FROM photon:4.0-20221029
+FROM photon:4.0-20230227
 
 USER root
 
@@ -45,7 +45,7 @@ RUN buildDeps="\
     && gem install --norc --no-document fluent-plugin-kubernetes_metadata_filter \
     #
     # Install Log Insight plugin
-    && gem install --norc --no-document -v 1.3.0 fluent-plugin-vmware-loginsight \
+    && gem install --norc --no-document -v 1.4.0 fluent-plugin-vmware-loginsight \
     #
     # Install jemalloc 5.3.0
     && curl -L --output /tmp/jemalloc-5.3.0.tar.bz2 https://github.com/jemalloc/jemalloc/releases/download/5.3.0/jemalloc-5.3.0.tar.bz2 \

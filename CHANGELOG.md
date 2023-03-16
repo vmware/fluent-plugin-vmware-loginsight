@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.4.0 - Mar 07, 2023
+
+* Base Photon image has been updated to photon:4.0-20230227
+* Log Insight has been changed to VMware Aria Operations For Logs
+
 ## v1.3.1 - Nov 01, 2022
 
 * Based Photon image has been updated to photon:4.0-20221029

@@ -1,4 +1,4 @@
-# Fluentd plugin for VMware Log Insight
+# Fluentd plugin for VMware Aria Operations For Logs
 # 
 # Copyright 2019 VMware, Inc. All Rights Reserved. 
 # 
@@ -30,7 +30,7 @@ RUN tdnf distro-sync --refresh -y \
     rubygem-async-http-0.48.2 \
     jemalloc-4.5.0 \
     #
-    # Install Log Insight plugin
+    # Install VMware Aria Operations For Logs plugin
     rubygem-fluent-plugin-vmware-loginsight-0.1.5
 
 RUN ln -s /usr/lib/ruby/gems/2.5.0/bin/fluentd /usr/bin/fluentd \
