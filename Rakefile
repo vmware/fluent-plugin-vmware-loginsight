@@ -1,4 +1,4 @@
-# Fluentd plugin for VMware Log Insight
+# Fluentd plugin for VMware Aria Operations For Logs
 # 
 # Copyright 2018 VMware, Inc. All Rights Reserved. 
 # 

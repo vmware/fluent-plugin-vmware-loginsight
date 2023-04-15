@@ -1,4 +1,4 @@
-# Fluentd plugin for VMware Log Insight
+# Fluentd plugin for VMware Aria Operations For Logs
 # 
 # Copyright 2018 VMware, Inc. All Rights Reserved. 
 # 
@@ -14,11 +14,11 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |spec|
   spec.name    = "fluent-plugin-vmware-loginsight"
-  spec.version = "0.1.10"
-  spec.authors = ["Vishal Mohite", "Chris Todd"]
-  spec.email   = ["vmohite@vmware.com", "toddc@vmware.com"]
+  spec.version = File.read("VERSION").strip
+  spec.authors = ["Vishal Mohite", "Chris Todd", "Samvel Israelyan"]
+  spec.email   = ["vmohite@vmware.com", "toddc@vmware.com", "sisraelyan@vmware.com"]
 
-  spec.summary       = %q{Fluend output plugin to forward logs to VMware Log Insight}
+  spec.summary       = %q{Fluend output plugin to forward logs to VMware Aria Operations For Logs}
   spec.description   = spec.summary
   spec.homepage      = "https://github.com/vmware/fluent-plugin-vmware-loginsight"
   spec.license       = "MIT"
@@ -31,7 +31,7 @@ Gem::Specification.new do |spec|
   spec.test_files    = test_files
   spec.require_paths = ["lib"]
 
-  spec.add_development_dependency "bundler", "~> 1.14"
+  spec.add_development_dependency "bundler", ">= 2.1.0"
   spec.add_development_dependency "rake", "~> 12.0"
   spec.add_development_dependency "test-unit", "~> 3.0"
   spec.add_runtime_dependency "fluentd", [">= 0.14.10", "< 2"]
