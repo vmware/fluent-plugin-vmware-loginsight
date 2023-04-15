@@ -121,7 +121,7 @@ module Fluent::Plugin
         set_json_header(req)
       end
       if @http_compress
-          set_gzip_header(req)
+        set_gzip_header(req)
       end
       req
     end
@@ -132,9 +132,9 @@ module Fluent::Plugin
     end
 
     def set_gzip_header(req)
-        req['Content-Encoding'] = 'gzip'
-        req
-      end
+      req['Content-Encoding'] = 'gzip'
+      req
+    end
 
     def shorten_key(key)
       # LI doesn't allow some characters in field 'name'
@@ -230,15 +230,15 @@ module Fluent::Plugin
     end
 
     def get_body(req)
-       body = ""
-       if @http_compress
-           gzip_body = Zlib::GzipReader.new(StringIO.new(req.body.to_s))
-           body = gzip_body.read
-       else
-           body = req.body
-       end
-       return body[1..1024]
-     end
+      body = ""
+      if @http_compress
+        gzip_body = Zlib::GzipReader.new(StringIO.new(req.body.to_s))
+        body = gzip_body.read
+      else
+        body = req.body
+      end
+      return body[1..1024]
+    end
 
     def send_request(req, uri)
       is_rate_limited = (@rate_limit_msec != 0 and not @last_request_time.nil?)
