@@ -12,6 +12,7 @@
 require 'fluent/plugin/output'
 require 'json'
 require 'net/http'
+require 'zlib'
 require 'uri'
 
 module Fluent::Plugin
@@ -44,6 +45,7 @@ module Fluent::Plugin
     # HTTP method
     # post | put
     config_param :http_method, :string, :default => :post
+    config_param :http_compress, :bool, :default => true
     # form | json
     config_param :serializer, :string, :default => :json
     config_param :request_retries, :integer, :default => 3
@@ -118,6 +120,9 @@ module Fluent::Plugin
       if @serializer == 'json'
         set_json_header(req)
       end
+      if @http_compress
+          set_gzip_header(req)
+      end
       req
     end
 
@@ -125,6 +130,11 @@ module Fluent::Plugin
       req['Content-Type'] = 'application/json'
       req
     end
+
+    def set_gzip_header(req)
+        req['Content-Encoding'] = 'gzip'
+        req
+      end
 
     def shorten_key(key)
       # LI doesn't allow some characters in field 'name'
@@ -219,13 +229,23 @@ module Fluent::Plugin
       ret
     end
 
+    def get_body(req)
+       body = ""
+       if @http_compress
+           gzip_body = Zlib::GzipReader.new(StringIO.new(req.body.to_s))
+           body = gzip_body.read
+       else
+           body = req.body
+       end
+       return body[1..1024]
+     end
+
     def send_request(req, uri)
       is_rate_limited = (@rate_limit_msec != 0 and not @last_request_time.nil?)
       if is_rate_limited and ((Time.now.to_f - @last_request_time) * 1000.0 < @rate_limit_msec)
         $log.info('Dropped request due to rate limiting')
         return
       end
-
       if @auth and @auth.to_s.eql? "basic"
         req.basic_auth(@username, @password)
       end
@@ -253,7 +273,7 @@ module Fluent::Plugin
         # log-container logs to LI as well, you may end up in a cycle.
         # TODO handle the cyclic case at plugin level if possible.
         # $log.warn "Net::HTTP.#{req.method.capitalize} raises exception: " \
-        #   "#{e.class}, '#{e.message}', \n Request: #{req.body[1..1024]}"
+        #   "#{e.class}, '#{e.message}', \n Request: #{get_body(req)}"
         retry unless (retries -= 1).zero?
         raise e if @raise_on_error
       else
@@ -267,17 +287,27 @@ module Fluent::Plugin
                           end
             # ditto cyclic warning
             # $log.warn "Failed to #{req.method} #{uri}\n(#{res_summary})\n" \
-            #   "Request Size: #{req.body.size} Request Body: #{req.body[1..1024]}"
+            #   "Request Size: #{req.body.size} Request Body: #{get_body(req)}"
          end #end unless
       end # end begin
     end # end send_request
+
+    def set_body(req, event_req)
+        if @http_compress
+            gzip_body = Zlib::GzipWriter.new(StringIO.new)
+            gzip_body << event_req.to_json
+            req.body = gzip_body.close.string
+        else
+            req.body = event_req.to_json
+        end
+    end
 
     def send_events(uri, events)
       req = Net::HTTP.const_get(@http_method.to_s.capitalize).new(uri.path)
       event_req = {
         "events" => events
       }
-      req.body = event_req.to_json
+      set_body(req, event_req)
       set_header(req)
       send_request(req, uri)
     end
