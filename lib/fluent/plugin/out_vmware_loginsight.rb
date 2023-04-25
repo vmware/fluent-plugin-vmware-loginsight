@@ -51,8 +51,9 @@ module Fluent::Plugin
     config_param :request_retries, :integer, :default => 3
     config_param :request_timeout, :time, :default => 5
     config_param :http_conn_debug, :bool, :default => false
-    # in bytes
-    config_param :max_batch_size, :integer, :default => 512000
+    # Log events batched per request.
+    # in bytes | default ~4MB
+    config_param :max_batch_size, :integer, :default => 4000000
 
     # Simple rate limiting: ignore any records within `rate_limit_msec`
     # since the last one.

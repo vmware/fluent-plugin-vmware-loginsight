@@ -131,7 +131,7 @@ request_timeout, :time, :default => 5
 http_conn_debug, :bool, :default => false :: Valid Value: true | false
 
 # Number of bytes per post request
-max_batch_size, :integer, :default => 512000
+max_batch_size, :integer, :default => 4000000
 
 # Simple rate limiting: ignore any records within `rate_limit_msec` since the last one
 rate_limit_msec, :integer, :default => 0
