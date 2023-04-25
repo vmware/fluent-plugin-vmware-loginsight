@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.4.1 - Apr 25, 2023
+
+* Add support for gzip compression ([#17](https://github.com/vmware/fluent-plugin-vmware-loginsight/pull/17),[#18](https://github.com/vmware/fluent-plugin-vmware-loginsight/pull/18), [@toddc-vmware](https://github.com/toddc-vmware))
+* Add support for multi-worker ([#27](https://github.com/vmware/fluent-plugin-vmware-loginsight/pull/27),[@yajith](https://github.com/yajith))
+* Update default batch size to 4MB from 512KB ([#28](https://github.com/vmware/fluent-plugin-vmware-loginsight/pull/28), [@mohitevishal](https://github.com/mohitevishal))
+
 ## v1.4.0 - Mar 07, 2023
 
 * Base Photon image has been updated to photon:4.0-20230227
