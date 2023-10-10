@@ -207,7 +207,7 @@ module Fluent::Plugin
       event = {
         "fields" => fields,
         "text" => log.gsub(/^$\n/, ''),
-        "timestamp" => time * 1000
+        "timestamp" => (time.to_f * 1000).floor()
       }
       event
     end
