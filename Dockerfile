@@ -45,7 +45,7 @@ RUN buildDeps="\
     && gem install --norc --no-document fluent-plugin-kubernetes_metadata_filter \
     #
     # Install Log Insight plugin
-    && gem install --norc --no-document -v 1.4.0 fluent-plugin-vmware-loginsight \
+    && gem install --norc --no-document -v 1.4.1 fluent-plugin-vmware-loginsight \
     #
     # Install jemalloc 5.3.0
     && curl -L --output /tmp/jemalloc-5.3.0.tar.bz2 https://github.com/jemalloc/jemalloc/releases/download/5.3.0/jemalloc-5.3.0.tar.bz2 \
