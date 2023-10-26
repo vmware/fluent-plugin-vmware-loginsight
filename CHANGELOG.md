@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.4.2 - Oct 19, 2023
+
+* Fixed the issue with the timestamp ignoring milliseconds ([#33](https://github.com/vmware/fluent-plugin-vmware-loginsight/pull/33))
+
 ## v1.4.1 - Apr 25, 2023
 
 * Add support for gzip compression ([#17](https://github.com/vmware/fluent-plugin-vmware-loginsight/pull/17),[#18](https://github.com/vmware/fluent-plugin-vmware-loginsight/pull/18), [@toddc-vmware](https://github.com/toddc-vmware))
