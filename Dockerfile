@@ -14,7 +14,7 @@
 # Fluentd is configured with the default configuration that gets produced by the `fluentd --setup` command. For an example of
 # a configuration that uses the fluent-plugin-vmware-loginsight plugin check fluent.conf under the examples dir:
 # https://github.com/vmware/fluent-plugin-vmware-loginsight/blob/master/examples/fluent.conf
-FROM photon:4.0-20230227
+FROM photon:4.0-20231021
 
 USER root
 
@@ -31,6 +31,7 @@ RUN buildDeps="\
     # These are not required but are used if available
     && gem install oj -v 3.3.10 \
     && gem install json -v 2.2.0 \
+    && gem install console -v 1.19.0 \
     && gem install async-http -v 0.46.3 \
     #
     # Install fluentd
@@ -45,7 +46,7 @@ RUN buildDeps="\
     && gem install --norc --no-document fluent-plugin-kubernetes_metadata_filter \
     #
     # Install Log Insight plugin
-    && gem install --norc --no-document -v 1.4.1 fluent-plugin-vmware-loginsight \
+    && gem install --norc --no-document -v 1.4.2 fluent-plugin-vmware-loginsight \
     #
     # Install jemalloc 5.3.0
     && curl -L --output /tmp/jemalloc-5.3.0.tar.bz2 https://github.com/jemalloc/jemalloc/releases/download/5.3.0/jemalloc-5.3.0.tar.bz2 \
